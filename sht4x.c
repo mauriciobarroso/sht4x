@@ -656,7 +656,7 @@ esp_err_t sht4x_activate_lowest_heater_power_short_ticks(sht4x_t *const me,
 /**
  * @brief Read out the serial number
  */
-esp_err_t sht4x_serial_number(sht4x_t *const me, uint32_t *serial_number) {
+esp_err_t sht4x_get_serial_number(sht4x_t *const me, uint32_t *serial_number) {
 	/* Variable to return error code */
 	esp_err_t ret = ESP_OK;
 
@@ -708,6 +708,7 @@ static int8_t i2c_read(uint8_t reg_addr, uint8_t *reg_data, uint32_t data_len,
 
 	return dev->read(reg_addr ? &reg_addr : NULL, reg_addr ? 1 : 0, reg_data, data_len, intf);
 }
+
 /**
  * @brief Function that implements the default I2C write transaction
  */
@@ -738,7 +739,6 @@ static void delay_us(uint32_t period_us) {
   	}
   }
 }
-
 
 /**
  * @brief Convert temperature ticks to physical temperature

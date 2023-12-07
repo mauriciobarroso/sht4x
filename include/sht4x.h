@@ -367,7 +367,7 @@ esp_err_t sht4x_activate_lowest_heater_power_short_ticks(sht4x_t *const me,
  *
  * @return error_code 0 on success, an error code otherwise.
  */
-esp_err_t sht4x_serial_number(sht4x_t *const me, uint32_t *serial_number);
+esp_err_t sht4x_get_serial_number(sht4x_t *const me, uint32_t *serial_number);
 
 /**
  * @brief Perform a soft reset.
