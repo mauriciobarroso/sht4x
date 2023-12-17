@@ -86,18 +86,18 @@ static void delay_us(uint32_t period_us);
  *
  * @param ticks temperature in ticks
  *
- * @return Temperature in milli centigrade.
+ * @return Temperature in degrees centigrade.
  */
-static int32_t convert_ticks_to_celsius(uint16_t ticks);
+static float convert_ticks_to_celsius(uint16_t ticks);
 
 /**
  * @brief Convert humidity ticks to physical humidity
  *
  * @param ticks relative humidity in ticks
  *
- * @return Humidity in milli percent relative humidity.
+ * @return Humidity in percent relative humidity.
  */
-static int32_t convert_ticks_to_percent_rh(uint16_t ticks);
+static float convert_ticks_to_percent_rh(uint16_t ticks);
 
 /* Exported functions definitions --------------------------------------------*/
 /**
@@ -132,8 +132,8 @@ esp_err_t sht4x_init(sht4x_t *const me, i2c_bus_t *i2c_bus, uint8_t dev_addr,
 /**
  * @brief Function for a single shot measurement with high repeatability.
  */
-esp_err_t sht4x_measure_high_precision(sht4x_t *const me, int32_t *temperature,
-		                                   int32_t *humidity) {
+esp_err_t sht4x_measure_high_precision(sht4x_t *const me, float *temperature,
+		                                   float *humidity) {
 	/* Variable to return error code */
 	esp_err_t ret = ESP_OK;
 
@@ -158,8 +158,8 @@ esp_err_t sht4x_measure_high_precision(sht4x_t *const me, int32_t *temperature,
 /**
  * @brief Function for a single shot measurement with medium repeatability.
  */
-esp_err_t sht4x_measure_medium_precision(sht4x_t *const me, int32_t *temperature,
-		                                     int32_t *humidity) {
+esp_err_t sht4x_measure_medium_precision(sht4x_t *const me, float *temperature,
+		                                     float *humidity) {
 	/* Variable to return error code */
 	esp_err_t ret = ESP_OK;
 
@@ -185,8 +185,8 @@ esp_err_t sht4x_measure_medium_precision(sht4x_t *const me, int32_t *temperature
 /**
  * @brief Function for a single shot measurement with lowest repeatability.
  */
-esp_err_t sht4x_measure_lowest_precision(sht4x_t *const me, int32_t *temperature,
-		                                     int32_t *humidity) {
+esp_err_t sht4x_measure_lowest_precision(sht4x_t *const me, float *temperature,
+		                                     float *humidity) {
 	/* Variable to return error code */
 	esp_err_t ret = ESP_OK;
 
@@ -213,8 +213,8 @@ esp_err_t sht4x_measure_lowest_precision(sht4x_t *const me, int32_t *temperature
  * shot high precision measurement for 1s.
  */
 esp_err_t sht4x_activate_highest_heater_power_long(sht4x_t *const me,
-		                                               int32_t *temperature,
-																									 int32_t *humidity) {
+		                                               float *temperature,
+																									 float *humidity) {
 	/* Variable to return error code */
 	esp_err_t ret = ESP_OK;
 
@@ -241,8 +241,8 @@ esp_err_t sht4x_activate_highest_heater_power_long(sht4x_t *const me,
  * shot high precision measurement for 0.1s.
  */
 esp_err_t sht4x_activate_highest_heater_power_short(sht4x_t *const me,
-		                                                int32_t *temperature,
-																										int32_t *humidity) {
+		                                                float *temperature,
+																										float *humidity) {
 	/* Variable to return error code */
 	esp_err_t ret = ESP_OK;
 
@@ -269,8 +269,8 @@ esp_err_t sht4x_activate_highest_heater_power_short(sht4x_t *const me,
  * shot high precision measurement for 1s.
  */
 esp_err_t sht4x_activate_medium_heater_power_long(sht4x_t *const me,
-		                                              int32_t *temperature,
-																									int32_t *humidity) {
+		                                              float *temperature,
+																									float *humidity) {
 	/* Variable to return error code */
 	esp_err_t ret = ESP_OK;
 
@@ -297,8 +297,8 @@ esp_err_t sht4x_activate_medium_heater_power_long(sht4x_t *const me,
  * shot high precision measurement for 0.1s.
  */
 esp_err_t sht4x_activate_medium_heater_power_short(sht4x_t *const me,
-		                                               int32_t *temperature,
-																									 int32_t *humidity) {
+		                                               float *temperature,
+																									 float *humidity) {
 	/* Variable to return error code */
 	esp_err_t ret = ESP_OK;
 
@@ -325,8 +325,8 @@ esp_err_t sht4x_activate_medium_heater_power_short(sht4x_t *const me,
  * shot high precision measurement for 1s.
  */
 esp_err_t sht4x_activate_lowest_heater_power_long(sht4x_t *const me,
-		                                              int32_t *temperature,
-																									int32_t *humidity) {
+		                                              float *temperature,
+																									float *humidity) {
 	/* Variable to return error code */
 	esp_err_t ret = ESP_OK;
 
@@ -353,8 +353,8 @@ esp_err_t sht4x_activate_lowest_heater_power_long(sht4x_t *const me,
  * shot high precision measurement for 0.1s.
  */
 esp_err_t sht4x_activate_lowest_heater_power_short(sht4x_t *const me,
-		                                               int32_t *temperature,
-																									 int32_t *humidity) {
+		                                               float *temperature,
+																									 float *humidity) {
 	/* Variable to return error code */
 	esp_err_t ret = ESP_OK;
 
@@ -743,15 +743,15 @@ static void delay_us(uint32_t period_us) {
 /**
  * @brief Convert temperature ticks to physical temperature
  */
-static int32_t convert_ticks_to_celsius(uint16_t ticks) {
-	return ((21875 * (int32_t)ticks) >> 13) - 45000;
+static float convert_ticks_to_celsius(uint16_t ticks) {
+	return (float)(((float)ticks * 175.0) / 65535.0) - 45.0;
 }
 
 /**
  * @brief Convert humidity ticks to physical humidity
  */
-static int32_t convert_ticks_to_percent_rh(uint16_t ticks) {
-	return ((15625 * (int32_t)ticks) >> 13) - 6000;
+static float convert_ticks_to_percent_rh(uint16_t ticks) {
+	return (float)(((float)ticks * 125.0) / 65535.0) - 6.0;
 }
 
 /***************************** END OF FILE ************************************/
