@@ -46,7 +46,7 @@ extern "C" {
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "i2c_bus.h"
+#include "driver/i2c_master.h"
 
 /* Exported Macros -----------------------------------------------------------*/
 #define SHT40_I2C_ADDR_44	0x44
@@ -57,22 +57,21 @@ extern "C" {
 #define SHT45_I2C_ADDR_45	0x45
 
 /* SHT4x commands */
-#define SHT4X_MEASURE_HIGH_PRECISION_TICKS_CMD							0xfd
-#define SHT4X_MEASURE_MEDIUM_PRECISION_TICKS_CMD						0xf6
-#define SHT4X_MEASURE_LOWEST_PRECISION_TICKS_CMD						0xe0
+#define SHT4X_MEASURE_HIGH_PRECISION_TICKS_CMD							0xFD
+#define SHT4X_MEASURE_MEDIUM_PRECISION_TICKS_CMD						0xF6
+#define SHT4X_MEASURE_LOWEST_PRECISION_TICKS_CMD						0xE0
 #define SHT4X_ACTIVATE_HIGHEST_HEATER_POWER_LONG_TICKS_CMD	0x39
 #define SHT4X_ACTIVATE_HIGHEST_HEATER_POWER_SHORT_TICKS_CMD	0x32
-#define SHT4X_ACTIVATE_MEDIUM_HEATER_POWER_LONG_TICKS_CMD		0x2f
+#define SHT4X_ACTIVATE_MEDIUM_HEATER_POWER_LONG_TICKS_CMD		0x2F
 #define SHT4X_ACTIVATE_MEDIUM_HEATER_POWER_SHORT_TICKS_CMD	0x24
-#define SHT4X_ACTIVATE_LOWEST_HEATER_POWER_LONG_TICKS_CMD		0x1e
+#define SHT4X_ACTIVATE_LOWEST_HEATER_POWER_LONG_TICKS_CMD		0x1E
 #define SHT4X_ACTIVATE_LOWEST_HEATER_POWER_SHORT_TICKS_CMD	0x15
 #define SHT4X_SERIAL_NUMBER_CMD															0x89
 #define SHT4X_SOFT_RESET_CMD																0x94
 
 /* Exported typedef ----------------------------------------------------------*/
 typedef struct {
-	i2c_bus_dev_t *i2c_dev;
-	uint16_t id;
+	i2c_master_dev_handle_t i2c_dev;	/*!< I2C device handle */
 } sht4x_t;
 
 /* Exported variables --------------------------------------------------------*/
@@ -85,20 +84,18 @@ typedef struct {
  * @param i2c_bus  : Pointer to a structure with the data to initialize the
  * 								   I2C device
  * @param dev_addr : I2C device address
- * @param read     : Pointer to I2C read function
- * @param write    : Pointer to I2C write function
  *
  * @return ESP_OK on success
  */
-esp_err_t sht4x_init(sht4x_t *const me, i2c_bus_t *i2c_bus, uint8_t dev_addr,
-		                 i2c_bus_read_t read, i2c_bus_write_t write);
+esp_err_t sht4x_init(sht4x_t *const me, i2c_master_bus_handle_t i2c_bus_handle,
+		uint8_t dev_addr);
 
 /**
  * @brief Function for a single shot measurement with high repeatability.
  *
- * @param me          : Pointer to a sht4x_t instance
- * @param temperature : Temperature in degrees centigrade.
- * @param humidity    : Humidity in percent relative humidity.
+ * @param me   : Pointer to a sht4x_t instance
+ * @param temp : Temperature in degrees centigrade.
+ * @param hum  : Humidity in percent relative humidity.
  *
  * @return 0 on success, an error code otherwise
  */
@@ -108,9 +105,9 @@ esp_err_t sht4x_measure_high_precision(sht4x_t *const me, float *temperature,
 /**
  * @brief Function for a single shot measurement with medium repeatability.
  *
- * @param me          : Pointer to a sht4x_t instance
- * @param temperature : Temperature in degrees centigrade.
- * @param humidity    : Humidity in percent relative humidity.
+ * @param me   : Pointer to a sht4x_t instance
+ * @param temp : Temperature in degrees centigrade.
+ * @param hum  : Humidity in percent relative humidity.
  *
  * @return 0 on success, an error code otherwise
  */
@@ -120,9 +117,9 @@ esp_err_t sht4x_measure_medium_precision(sht4x_t *const me, float *temperature,
 /**
  * @brief Function for a single shot measurement with lowest repeatability.
  *
- * @param me          : Pointer to a sht4x_t instance
- * @param temperature : Temperature in degrees centigrade.
- * @param humidity    : Humidity in percent relative humidity.
+ * @param me   : Pointer to a sht4x_t instance
+ * @param temp : Temperature in degrees centigrade.
+ * @param hum  : Humidity in percent relative humidity.
  *
  * @return 0 on success, an error code otherwise
  */
@@ -133,9 +130,9 @@ esp_err_t sht4x_measure_lowest_precision(sht4x_t *const me, float *temperature,
  * @brief Function to activate highest heater power and perform a single
  * shot high precision measurement for 1s.
  *
- * @param me          : Pointer to a sht4x_t instance
- * @param temperature : Temperature in degrees centigrade.
- * @param humidity    : Humidity in percent relative humidity.
+ * @param me   : Pointer to a sht4x_t instance
+ * @param temp : Temperature in degrees centigrade.
+ * @param hum  : Humidity in percent relative humidity.
  *
  * @return 0 on success, an error code otherwise
  */
@@ -147,9 +144,9 @@ esp_err_t sht4x_activate_highest_heater_power_long(sht4x_t *const me,
  * @brief Function to activate highest heater power and perform a single
  * shot high precision measurement for 0.1s.
  *
- * @param me          : Pointer to a sht4x_t instance
- * @param temperature : Temperature in degrees centigrade.
- * @param humidity    : Humidity in percent relative humidity.
+ * @param me   : Pointer to a sht4x_t instance
+ * @param temp : Temperature in degrees centigrade.
+ * @param hum  : Humidity in percent relative humidity.
  *
  * @return 0 on success, an error code otherwise
  */
@@ -161,9 +158,9 @@ esp_err_t sht4x_activate_highest_heater_power_short(sht4x_t *const me,
  * @brief Function to activate medium heater power and perform a single
  * shot high precision measurement for 1s.
  *
- * @param me          : Pointer to a sht4x_t instance
- * @param temperature : Temperature in degrees centigrade.
- * @param humidity    : Humidity in percent relative humidity.
+ * @param me   : Pointer to a sht4x_t instance
+ * @param temp : Temperature in degrees centigrade.
+ * @param hum  : Humidity in percent relative humidity.
  *
  * @return 0 on success, an error code otherwise
  */
@@ -175,9 +172,9 @@ esp_err_t sht4x_activate_medium_heater_power_long(sht4x_t *const me,
  * @brief Function to activate medium heater power and perform a single
  * shot high precision measurement for 0.1s.
  *
- * @param me          : Pointer to a sht4x_t instance
- * @param temperature : Temperature in degrees centigrade.
- * @param humidity    : Humidity in percent relative humidity.
+ * @param me   : Pointer to a sht4x_t instance
+ * @param temp : Temperature in degrees centigrade.
+ * @param hum  : Humidity in percent relative humidity.
  *
  * @return 0 on success, an error code otherwise
  */
@@ -189,9 +186,9 @@ esp_err_t sht4x_activate_medium_heater_power_short(sht4x_t *const me,
  * @brief Function to activate lowest heater power and perform a single
  * shot high precision measurement for 1s.
  *
- * @param me          : Pointer to a sht4x_t instance
- * @param temperature : Temperature in degrees centigrade.
- * @param humidity    : Humidity in percent relative humidity.
+ * @param me   : Pointer to a sht4x_t instance
+ * @param temp : Temperature in degrees centigrade.
+ * @param hum  : Humidity in percent relative humidity.
  *
  * @return 0 on success, an error code otherwise
  */
@@ -203,9 +200,9 @@ esp_err_t sht4x_activate_lowest_heater_power_long(sht4x_t *const me,
  * @brief Function to activate lowest heater power and perform a single
  * shot high precision measurement for 0.1s.
  *
- * @param me          : Pointer to a sht4x_t instance
- * @param temperature : Temperature in degrees centigrade.
- * @param humidity    : Humidity in percent relative humidity.
+ * @param me   : Pointer to a sht4x_t instance
+ * @param temp : Temperature in degrees centigrade.
+ * @param hum  : Humidity in percent relative humidity.
  *
  * @return 0 on success, an error code otherwise
  */
@@ -216,150 +213,150 @@ esp_err_t sht4x_activate_lowest_heater_power_short(sht4x_t *const me,
 /**
  * @brief Function for a single shot measurement with high repeatability.
  *
- * @param me                     : Pointer to a sht4x_t instance
- * @param[out] temperature_ticks : Temperature ticks. Convert to degrees celsius
- * by (175 * value / 65535) - 45
- * @param[out] humidity_ticks    :Humidity ticks. Convert to degrees celsius by
- * (125 * value / 65535) - 6
+ * @param me         : Pointer to a sht4x_t instance
+ * @param temp_ticks : Temperature ticks. Convert to degrees celsius
+ *                     by (175 * value / 65535) - 45
+ * @param hum_ticks  : Humidity ticks. Convert to degrees celsius by
+ *                     (125 * value / 65535) - 6
  *
  * @return error_code 0 on success, an error code otherwise.
  */
 esp_err_t sht4x_measure_high_precision_ticks(sht4x_t *const me,
-		                                         uint16_t *temperature_ticks,
-																						 uint16_t *humidity_ticks);
+		                                         uint16_t *temp_ticks,
+																						 uint16_t *hum_ticks);
 
 /**
  * @brief Function for a single shot measurement with medium repeatability.
  *
- * @param me                     : Pointer to a sht4x_t instance
- * @param[out] temperature_ticks : Temperature ticks. Convert to degrees celsius
- * by (175 * value / 65535) - 45
- * @param[out] humidity_ticks    : Humidity ticks. Convert to degrees celsius by
- * (125 * value / 65535) - 6
+ * @param me         : Pointer to a sht4x_t instance
+ * @param temp_ticks : Temperature ticks. Convert to degrees celsius
+ *                     by (175 * value / 65535) - 45
+ * @param hum_ticks  : Humidity ticks. Convert to degrees celsius by
+ *                     (125 * value / 65535) - 6
  *
  * @return error_code 0 on success, an error code otherwise.
  */
 esp_err_t sht4x_measure_medium_precision_ticks(sht4x_t *const me,
-		                                           uint16_t *temperature_ticks,
-																							 uint16_t *humidity_ticks);
+		                                           uint16_t *temp_ticks,
+																							 uint16_t *hum_ticks);
 
 /**
  * @brief Function for a single shot measurement with lowest repeatability.
  *
- * @param me                     : Pointer to a sht4x_t instance
- * @param[out] temperature_ticks : Temperature ticks. Convert to degrees celsius
- * by (175 * value / 65535) - 45
- * @param[out] humidity_ticks    : Humidity ticks. Convert to degrees celsius by
- * (125 * value / 65535) - 6
+ * @param me         : Pointer to a sht4x_t instance
+ * @param temp_ticks : Temperature ticks. Convert to degrees celsius
+ *                     by (175 * value / 65535) - 45
+ * @param hum_ticks  : Humidity ticks. Convert to degrees celsius by
+ *                     (125 * value / 65535) - 6
  *
  * @return error_code 0 on success, an error code otherwise.
  */
 esp_err_t sht4x_measure_lowest_precision_ticks(sht4x_t *const me,
-		                                           uint16_t *temperature_ticks,
-																							 uint16_t *humidity_ticks);
+		                                           uint16_t *temp_ticks,
+																							 uint16_t *hum_ticks);
 
 /**
  * @brief Function to activate highest heater power and perform a single shot high
  * precision measurement for 1s.
  *
- * @param me                     : Pointer to a sht4x_t instance
- * @param[out] temperature_ticks : Temperature ticks. Convert to degrees celsius
- * by (175 * value / 65535) - 45
- * @param[out] humidity_ticks    : Humidity ticks. Convert to degrees celsius by
- * (125 * value / 65535) - 6
+ * @param me         : Pointer to a sht4x_t instance
+ * @param temp_ticks : Temperature ticks. Convert to degrees celsius
+ *                     by (175 * value / 65535) - 45
+ * @param hum_ticks  : Humidity ticks. Convert to degrees celsius by
+ *                     (125 * value / 65535) - 6
  *
  * @return error_code 0 on success, an error code otherwise.
  */
 esp_err_t sht4x_activate_highest_heater_power_long_ticks(sht4x_t *const me,
-		                                                     uint16_t *temperature_ticks,
-																												 uint16_t *humidity_ticks);
+		                                                     uint16_t *temp_ticks,
+																												 uint16_t *hum_ticks);
 
 /**
  * @brief Function to activate highest heater power and perform a single
  * shot high precision measurement for 0.1s.
  *
- * @param me                     : Pointer to a sht4x_t instance
- * @param[out] temperature_ticks : Temperature ticks. Convert to degrees celsius
- * by (175 * value / 65535) - 45
- * @param[out] humidity_ticks    : Humidity ticks. Convert to degrees celsius by
- * (125 * value / 65535) - 6
+ * @param me         : Pointer to a sht4x_t instance
+ * @param temp_ticks : Temperature ticks. Convert to degrees celsius
+ *                     by (175 * value / 65535) - 45
+ * @param hum_ticks  : Humidity ticks. Convert to degrees celsius by
+ *                     (125 * value / 65535) - 6
  *
  * @return error_code 0 on success, an error code otherwise.
  */
 esp_err_t sht4x_activate_highest_heater_power_short_ticks(sht4x_t *const me,
-		                                                      uint16_t *temperature_ticks,
-																													uint16_t *humidity_ticks);
+		                                                      uint16_t *temp_ticks,
+																													uint16_t *hum_ticks);
 
 /**
  * @brief Function to activate medium heater power and perform a single
  * shot high precision measurement for 1s.
  *
- * @param me                     : Pointer to a sht4x_t instance
- * @param[out] temperature_ticks : Temperature ticks. Convert to degrees celsius
- * by (175 * value / 65535) - 45
- * @param[out] humidity_ticks    : Humidity ticks. Convert to degrees celsius by
- * (125 * value / 65535) - 6
+ * @param me         : Pointer to a sht4x_t instance
+ * @param temp_ticks : Temperature ticks. Convert to degrees celsius
+ *                     by (175 * value / 65535) - 45
+ * @param hum_ticks  : Humidity ticks. Convert to degrees celsius by
+ *                     (125 * value / 65535) - 6
  *
  * @return error_code 0 on success, an error code otherwise.
  */
 
 esp_err_t sht4x_activate_medium_heater_power_long_ticks(sht4x_t *const me,
-		                                                    uint16_t *temperature_ticks,
-																												uint16_t *humidity_ticks);
+		                                                    uint16_t *temp_ticks,
+																												uint16_t *hum_ticks);
 
 /**
  * @brief Function to activate medium heater power and perform a single
  * shot high precision measurement for 0.1s.
  *
- * @param me                     : Pointer to a sht4x_t instance
- * @param[out] temperature_ticks : Temperature ticks. Convert to degrees celsius
- * by (175 * value / 65535) - 45
- * @param[out] humidity_ticks    : Humidity ticks. Convert to degrees celsius by
- * (125 * value / 65535) - 6
+ * @param me         : Pointer to a sht4x_t instance
+ * @param temp_ticks : Temperature ticks. Convert to degrees celsius
+ *                     by (175 * value / 65535) - 45
+ * @param hum_ticks  : Humidity ticks. Convert to degrees celsius by
+ *                     (125 * value / 65535) - 6
  *
  * @return error_code 0 on success, an error code otherwise.
  */
 esp_err_t sht4x_activate_medium_heater_power_short_ticks(sht4x_t *const me,
-		                                                     uint16_t *temperature_ticks,
-																												 uint16_t *humidity_ticks);
+		                                                     uint16_t *temp_ticks,
+																												 uint16_t *hum_ticks);
 
 /**
  * @brief Function to activate lowest heater power and perform a single
  * shot high precision measurement for 1s.
  *
- * @param me                     : Pointer to a sht4x_t instance
- * @param[out] temperature_ticks : Temperature ticks. Convert to degrees celsius
- * by (175 * value / 65535) - 45
- * @param[out] humidity_ticks    : Humidity ticks. Convert to degrees celsius by
- * (125 * value / 65535) - 6
+ * @param me         : Pointer to a sht4x_t instance
+ * @param temp_ticks : Temperature ticks. Convert to degrees celsius
+ *                     by (175 * value / 65535) - 45
+ * @param hum_ticks  : Humidity ticks. Convert to degrees celsius by
+ *                     (125 * value / 65535) - 6
  *
  * @return error_code 0 on success, an error code otherwise.
  */
 esp_err_t sht4x_activate_lowest_heater_power_long_ticks(sht4x_t *const me,
-		                                                    uint16_t *temperature_ticks,
-																												uint16_t *humidity_ticks);
+		                                                    uint16_t *temp_ticks,
+																												uint16_t *hum_ticks);
 
 /**
  * @brief Function to activate lowest heater power and perform a single
  * shot high precision measurement for 0.1s.
  *
- * @param me                     : Pointer to a sht4x_t instance
- * @param[out] temperature_ticks : Temperature ticks. Convert to degrees celsius
- * by (175 * value / 65535) - 45
- * @param[out] humidity_ticks    : Humidity ticks. Convert to degrees celsius by
- * (125 * value / 65535) - 6
+ * @param me         : Pointer to a sht4x_t instance
+ * @param temp_ticks : Temperature ticks. Convert to degrees celsius
+ *                     by (175 * value / 65535) - 45
+ * @param hum_ticks  : Humidity ticks. Convert to degrees celsius by
+ *                     (125 * value / 65535) - 6
  *
  * @return error_code 0 on success, an error code otherwise.
  */
 esp_err_t sht4x_activate_lowest_heater_power_short_ticks(sht4x_t *const me,
-		                                                     uint16_t *temperature_ticks,
-																												 uint16_t *humidity_ticks);
+		                                                     uint16_t *temp_ticks,
+																												 uint16_t *hum_ticks);
 
 /**
  * @brief Read out the serial number
  *
- * @param me                 : Pointer to a sht4x_t instance
- * @param[out] serial_number : Unique serial number
+ * @param me            : Pointer to a sht4x_t instance
+ * @param serial_number : Unique serial number
  *
  * @note Each sensor has a unique serial number that is assigned by Sensirion
  * during production.It is stored in the one-time-programmable memory and cannot
